@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap Calculator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .calculator {
+            width: 300px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+        .display {
+            height: 60px;
+            font-size: 2em;
+            text-align: right;
+            padding-right: 10px;
+            border: none;
+            background: #eee;
+        }
+    </style>
+</head>
+<body class="d-flex justify-content-center align-items-center vh-100 bg-light">
+    <div class="calculator text-center">
+        <input type="text" class="form-control mb-2 display" id="display" disabled>
+
+        <!-- Row 1 -->
+        <div class="row g-2">
+            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(1)">1</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(2)">2</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(3)">3</button></div>
+            <div class="col-3"><button class="btn btn-warning w-100" onclick="appendOperator('+')">+</button></div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="row g-2 mt-2">
+            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(4)">4</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(5)">5</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(6)">6</button></div>
+            <div class="col-3"><button class="btn btn-warning w-100" onclick="appendOperator('-')">−</button></div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="row g-2 mt-2">
+            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(7)">7</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(8)">8</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(9)">9</button></div>
+            <div class="col-3"><button class="btn btn-warning w-100" onclick="appendOperator('*')">×</button></div>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="row g-2 mt-2">
+            <div class="col-3"><button class="btn btn-danger w-100" onclick="clearDisplay()">C</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(0)">0</button></div>
+            <div class="col-3"><button class="btn btn-success w-100" onclick="calculate()">=</button></div>
+            <div class="col-3"><button class="btn btn-warning w-100" onclick="appendOperator('/')">÷</button></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function appendNumber(num) {
+            document.getElementById("display").value += num;
+        }
+
+        function appendOperator(op) {
+            let display = document.getElementById("display");
+            let lastChar = display.value.slice(-1);
+
+            // Prevent duplicate operators
+            if (display.value !== "" && !"+-*/".includes(lastChar)) {
+                display.value += op;
+            }
+        }
+
+        function calculate() {
+            try {
+                document.getElementById("display").value = eval(document.getElementById("display").value);
+            } catch {
+                document.getElementById("display").value = "Error";
+            }
+        }
+
+        function clearDisplay() {
+            document.getElementById("display").value = "";
+        }
+    </script>
+</body>
+</html>
