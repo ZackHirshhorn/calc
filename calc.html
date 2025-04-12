@@ -30,43 +30,92 @@
 
         <!-- Row 1 -->
         <div class="row g-2">
-            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(1)">1</button></div>
-            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(2)">2</button></div>
-            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(3)">3</button></div>
-            <div class="col-3"><button class="btn btn-warning w-100" onclick="appendOperator('+')">+</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100">1</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100">2</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100">3</button></div>
+            <div class="col-3"><button class="btn btn-warning w-100">+</button></div>
         </div>
 
         <!-- Row 2 -->
         <div class="row g-2 mt-2">
-            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(4)">4</button></div>
-            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(5)">5</button></div>
-            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(6)">6</button></div>
-            <div class="col-3"><button class="btn btn-warning w-100" onclick="appendOperator('-')">−</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100">4</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100">5</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100">6</button></div>
+            <div class="col-3"><button class="btn btn-warning w-100">-</button></div>
         </div>
 
         <!-- Row 3 -->
         <div class="row g-2 mt-2">
-            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(7)">7</button></div>
-            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(8)">8</button></div>
-            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(9)">9</button></div>
-            <div class="col-3"><button class="btn btn-warning w-100" onclick="appendOperator('*')">×</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100">7</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100">8</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100">9</button></div>
+            <div class="col-3"><button class="btn btn-warning w-100">×</button></div>
         </div>
 
         <!-- Row 4 -->
         <div class="row g-2 mt-2">
-            <div class="col-3"><button class="btn btn-danger w-100" onclick="clearDisplay()">C</button></div>
-            <div class="col-3"><button class="btn btn-secondary w-100" onclick="appendNumber(0)">0</button></div>
-            <div class="col-3"><button class="btn btn-success w-100" onclick="calculate()">=</button></div>
-            <div class="col-3"><button class="btn btn-warning w-100" onclick="appendOperator('/')">÷</button></div>
+            <div class="col-3"><button class="btn btn-danger w-100">C</button></div>
+            <div class="col-3"><button class="btn btn-secondary w-100">0</button></div>
+            <div class="col-3"><button class="btn btn-success w-100">=</button></div>
+            <div class="col-3"><button class="btn btn-warning w-100">÷</button></div>
         </div>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
+    <script src="calcTree.js" type="module"></script>
+    <script type="module">
+        import * as calcTree from "./calcTree.js";
+
+        const normalizeOp = op => ({
+            "−": "-", // Unicode minus to ASCII
+            "×": "*", // Fancy times to *
+            "÷": "/"  // Division symbol to /
+        }[op] || op);
+
+        function isDigit(c) {
+            return !isNaN(c) && !isNaN(parseFloat(c));
+        }
+
+        function isControl(c) {
+            return ["C", "="].includes(c);
+        }
+
+        function attachAppendNumber(btn, c) {
+            btn.addEventListener("click", () => {
+                appendNumber(c);
+            });
+        }
+
+        function attachAppendOperator(btn, c) {
+            btn.addEventListener("click", () => {
+                appendOperator(c);
+            });
+        }
+
+        function attachControl(btn, c) {
+            if (c === 'C')
+                btn.addEventListener("click", clearDisplay);
+            else if (c === '=')
+                btn.addEventListener("click", calculate);
+            else
+                console.log("unknown control detected: " + c);
+        }
+
+        Array.from(document.getElementsByClassName("btn")).forEach(btn => {
+            let c = btn.textContent;
+            if (isDigit(c))
+                attachAppendNumber(btn, c);
+            else if (isControl(c))
+                attachControl(btn, c);
+            else
+                attachAppendOperator(btn, c);
+        });
+
         function appendNumber(num) {
             document.getElementById("display").value += num;
+            calcTree.appendNumber(num);
         }
 
         function appendOperator(op) {
@@ -74,21 +123,27 @@
             let lastChar = display.value.slice(-1);
 
             // Prevent duplicate operators
-            if (display.value !== "" && !"+-*/".includes(lastChar)) {
+            if (display.value !== "" && !"+-*/".includes(normalizeOp(lastChar))) {
                 display.value += op;
+                calcTree.appendBinaryOperation(normalizeOp(op));
             }
         }
 
         function calculate() {
             try {
-                document.getElementById("display").value = eval(document.getElementById("display").value);
-            } catch {
+                let result = calcTree.calculate();
+                document.getElementById("display").value = result;
+                calcTree.resetTree();
+                calcTree.appendNumber(result);
+            } catch (ec) {
+                console.log(ec);
                 document.getElementById("display").value = "Error";
             }
         }
 
         function clearDisplay() {
             document.getElementById("display").value = "";
+            calcTree.resetTree();
         }
     </script>
 </body>
