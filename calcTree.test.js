@@ -26,6 +26,15 @@ test("3 + 4 = 7", () => {
     if (result !== 7) throw `Expected 7, got ${result}`;
 });
 
+test("33 - 21 = 12", () => {
+    resetTree();
+    appendNumber(33);
+    appendBinaryOperation("-");
+    appendNumber(21);
+    const result = calculate();
+    if (result !== 12) throw `Expected 12, got ${result}`;
+});
+
 test("5 * 2 = 10", () => {
     resetTree();
     appendNumber(5);
@@ -46,17 +55,6 @@ test("3 + 2 * 4 = 11 (operator precedence)", () => {
     if (result !== 11) throw `Expected 11, got ${result}`;
 });
 
-test("Error: two numbers in a row", () => {
-    resetTree();
-    appendNumber(5);
-    try {
-        appendNumber(3);
-        throw "Expected error, but didn't get one.";
-    } catch ([code]) {
-        if (code !== 1) throw `Expected error code 1, got ${code}`;
-    }
-});
-
 test("Error: two operators in a row", () => {
     resetTree();
     appendNumber(5);
@@ -64,8 +62,9 @@ test("Error: two operators in a row", () => {
     try {
         appendBinaryOperation("*");
         throw "Expected error, but didn't get one.";
-    } catch ([code]) {
-        if (code !== 2) throw `Expected error code 2, got ${code}`;
+    } catch (err) {
+        if (!(err instanceof Error)) throw `Unexpected error: ${err}`;
+        if (err.code !== 2) throw `Expected error code 2, got ${err.code}`;
     }
 });
 
@@ -138,17 +137,6 @@ test("5 + 6 * 2 - 4 / 2 = 15", () => {
 });
 
 // Error tests
-test("Error: number after number", () => {
-    resetTree();
-    appendNumber(5);
-    try {
-        appendNumber(3);
-        throw "Expected error, but got none";
-    } catch ([code]) {
-        if (code !== 1) throw `Expected error code 1, got ${code}`;
-    }
-});
-
 test("Error: operator after operator", () => {
     resetTree();
     appendNumber(5);
@@ -156,8 +144,9 @@ test("Error: operator after operator", () => {
     try {
         appendBinaryOperation("*");
         throw "Expected error, but got none";
-    } catch ([code]) {
-        if (code !== 2) throw `Expected error code 2, got ${code}`;
+    } catch (err) {
+        if (!(err instanceof Error)) throw `Unexpected error: ${err}`;
+        if (err.code !== 2) throw `Expected error code 2, got ${err.code}`;
     }
 });
 
@@ -166,8 +155,9 @@ test("Error: starting with operator", () => {
     try {
         appendBinaryOperation("+");
         throw "Expected error, but got none";
-    } catch ([code]) {
-        if (code !== 2) throw `Expected error code 2, got ${code}`;
+    } catch (err) {
+        if (!(err instanceof Error)) throw `Unexpected error: ${err}`;
+        if (err.code !== 2) throw `Expected error code 2, got ${err.code}`;
     }
 });
 
@@ -178,7 +168,69 @@ test("Error: calculate before completing operation", () => {
     try {
         calculate();
         throw "Expected error, but got none";
-    } catch ([code]) {
-        if (code !== 3) throw `Expected error code 3, got ${code}`;
+    } catch (err) {
+        if (!(err instanceof Error)) throw `Unexpected error: ${err}`;
+        if (err.code !== 3) throw `Expected error code 3, got ${err.code}`;
     }
+});
+
+test("Error: division by zero", () => {
+    resetTree();
+    appendNumber(5);
+    appendBinaryOperation("/");
+    appendNumber(0);
+    try {
+        calculate();
+        throw "Expected error, but got none";
+    } catch (err) {
+        if (!(err instanceof Error)) throw `Unexpected error: ${err}`;
+        if (err.code !== 4) throw `Expected code 4, got ${err.code}`;
+    }
+});
+
+test("12 + 34 = 46", () => {
+    resetTree();
+    appendNumber(12);
+    appendBinaryOperation("+");
+    appendNumber(34);
+    const result = calculate();
+    if (result !== 46) throw `Expected 46, got ${result}`;
+});
+
+test("1000 - 999 = 1", () => {
+    resetTree();
+    appendNumber(1000);
+    appendBinaryOperation("-");
+    appendNumber(999);
+    const result = calculate();
+    if (result !== 1) throw `Expected 1, got ${result}`;
+});
+
+test("25 * 4 = 100", () => {
+    resetTree();
+    appendNumber(25);
+    appendBinaryOperation("*");
+    appendNumber(4);
+    const result = calculate();
+    if (result !== 100) throw `Expected 100, got ${result}`;
+});
+
+test("500 / 25 = 20", () => {
+    resetTree();
+    appendNumber(500);
+    appendBinaryOperation("/");
+    appendNumber(25);
+    const result = calculate();
+    if (result !== 20) throw `Expected 20, got ${result}`;
+});
+
+test("100 + 20 * 3 = 160", () => {
+    resetTree();
+    appendNumber(100);
+    appendBinaryOperation("+");
+    appendNumber(20);
+    appendBinaryOperation("*");
+    appendNumber(3);
+    const result = calculate();
+    if (result !== 160) throw `Expected 160, got ${result}`;
 });

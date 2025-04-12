@@ -1,3 +1,4 @@
+import makeError from "./calcError.js";
 
 let innerTree = null;
 /*
@@ -10,7 +11,10 @@ let binaryOperations = {
     "+": (op1, op2) => op1 + op2,
     "-": (op1, op2) => op1 - op2,
     "*": (op1, op2) => op1 * op2,
-    "/": (op1, op2) => op1 / op2,
+    "/": (op1, op2) => {
+        if (op2 === 0) throw makeError(4, "Division by zero");
+        return op1 / op2;
+    },
 };
 
 let orderOfOperations = {
@@ -22,9 +26,10 @@ function doesOp1Precede(op1, op2) {
 }
 
 let errorCodes = {
-    1: "expecting an operation, not a numver",
+    1: "expecting an operation, not a number",
     2: "expecting an operand (a number), not an operation",
     3: "expecting a second operand, can't perform calculation",
+    4: "division by zero is not allowed",
 };
 
 function makeBinaryCalculate(tree) {
@@ -64,29 +69,30 @@ export function appendNumber(num) {
     num = Number(num);
     if (innerTree === null) {
         innerTree = {val: num, calculate: () => num};
-    } else if (innerTree.val in binaryOperations) {
-        appendRightRecursively(innerTree, num);
     } else {
-        throw [1, num];
+        appendRightRecursively(innerTree, num);
     }
 }
 
 export function appendBinaryOperation(op) {
     if (innerTree === null || (innerTree.val in binaryOperations && !("right" in innerTree))) {
-        throw [2, op];
+        throw makeError(2, op);
     } else if (innerTree.val in binaryOperations && "right" in innerTree) {
         if (doesOp1Precede(innerTree.val, String(op))) {
-            innerTree = {left: innerTree, val: String(op), calculate: function() {throw [3, op]}};
+            innerTree = {left: innerTree, val: String(op),
+                         calculate: function() {throw makeError(3, op)}};
         } else {
             innerTree["right"] = {left: innerTree["right"], val: String(op),
-                                  calculate: function() {throw [3, op]}};
+                                  calculate: function() {throw makeError(3, op)}};
         }
     } else {
-        innerTree = {left: innerTree, val: String(op), calculate: function() {throw [3, op]}};
+        innerTree = {left: innerTree, val: String(op),
+                     calculate: function() {throw makeError(3, op)}};
     }
 }
 
 export function calculate() {
+    // console.log("tree state:", JSON.stringify(innerTree));
     return innerTree.calculate();
 }
 

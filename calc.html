@@ -68,11 +68,21 @@
     <script type="module">
         import * as calcTree from "./calcTree.js";
 
+        let number = "";
+
         const normalizeOp = op => ({
             "−": "-", // Unicode minus to ASCII
             "×": "*", // Fancy times to *
             "÷": "/"  // Division symbol to /
         }[op] || op);
+
+        const errors = [
+            ,
+            "Operation needed",
+            "Number needed",
+            "2'nd number needed",
+            "Division by Zero",
+        ];
 
         function isDigit(c) {
             return !isNaN(c) && !isNaN(parseFloat(c));
@@ -115,10 +125,16 @@
 
         function appendNumber(num) {
             document.getElementById("display").value += num;
-            calcTree.appendNumber(num);
+            number += num;
         }
 
         function appendOperator(op) {
+
+            if (number !== "") {
+                calcTree.appendNumber(number);
+                number = "";
+            }
+
             let display = document.getElementById("display");
             let lastChar = display.value.slice(-1);
 
@@ -130,14 +146,20 @@
         }
 
         function calculate() {
+            
+            if (number !== "") {
+                calcTree.appendNumber(number);
+                number = "";
+            }
+
             try {
                 let result = calcTree.calculate();
                 document.getElementById("display").value = result;
                 calcTree.resetTree();
                 calcTree.appendNumber(result);
-            } catch (ec) {
-                console.log(ec);
-                document.getElementById("display").value = "Error";
+            } catch (e) {
+                console.log(e);
+                document.getElementById("display").value = errors[e.code];
             }
         }
 
