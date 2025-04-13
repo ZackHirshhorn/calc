@@ -143,6 +143,11 @@
                 display.value += op;
                 calcTree.appendBinaryOperation(normalizeOp(op));
             }
+
+            else if (op === "-") {
+                display.value += op;
+                calcTree.appendUnaryMinus();
+            }
         }
 
         function calculate() {
